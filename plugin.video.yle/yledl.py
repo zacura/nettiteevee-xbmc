@@ -293,34 +293,36 @@ class AreenaNGDownloader:
         latest_only is True) from url."""
         return self.process_episodes(url, parameters, latest_episode, sublang, destdir, False)
 
-    def print_urls(self, url, latest_episode, sublang='all'):
+    def print_urls(self, url, latest_episode, subfile, sublang='all'):
         """Extract episodes from url and print their
         librtmp-compatible URLs on stdout."""
-        return self.process_episodes(url, [], latest_episode, sublang, None, True)
+        return self.process_episodes(url, [], latest_episode, sublang, None, True, subfile)
 
-    def process_episodes(self, url, parameters, latest_only, sublang, destdir, print_url):
+    def process_episodes(self, url, parameters, latest_only, sublang, destdir, print_url, subfile):
         playlist = self.get_playlist(url, latest_only)
         if not playlist:
             return RD_FAILED
 
         for clip in playlist:
-            return self.process_single_episode(clip, url, parameters,sublang, destdir, print_url)
+            return self.process_single_episode(clip, url, parameters,sublang, destdir, print_url, subfile)
 
         return RD_SUCCESS
 
     def process_single_episode(self, clip, pageurl, parameters,
-                               sublang, destdir, print_url):
+                               sublang, destdir, print_url, subfile):
         """Construct clip parameters and starts a rtmpdump process."""
         rtmpparams = self.get_rtmp_parameters(clip, pageurl)
         if not rtmpparams:
             return RD_FAILED
 	media = clip.get('media', {})
         if media.has_key('subtitles'):
-            self.download_subtitles(media['subtitles'], sublang, "/tmp/areenasub.srt")
+            #self.download_subtitles(media['subtitles'], sublang, "/tmp/areenasub.srt")
+			realsubfile = self.download_subtitles(media['subtitles'], sublang, subfile)
+			print "subfile:", subfile
 
         if print_url:
             enc = sys.getfilesystemencoding()
-            return self.rtmp_parameters_to_url(rtmpparams).encode(enc, 'replace')
+            return self.rtmp_parameters_to_url(rtmpparams).encode(enc, 'replace'), realsubfile
             return RD_SUCCESS
 
 

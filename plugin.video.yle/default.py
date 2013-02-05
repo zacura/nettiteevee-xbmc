@@ -94,11 +94,16 @@ if 'item_url' in request:
 	print request
 	item_url = request['item_url']
 	areena = AreenaNGDownloader()
-	try: 
-		os.remove("/tmp/areenasub.fin.srt")
-	except:
-		pass
-	output = areena.print_urls(item_url, False).rstrip()
+	subfilename = os.tempnam()
+	print "subfilename:", subfilename
+	#try: 
+	#	os.remove("/tmp/areenasub.fin.srt")
+	#except:
+	#	pass
+	output, subfilename = areena.print_urls(item_url, False, subfile=subfilename)
+	output = output.rstrip()
+	print subfilename
+	
 	print output
 	item = xbmcgui.ListItem("YLE");
 	params = output.split(" ")
@@ -109,7 +114,8 @@ if 'item_url' in request:
 			print param.split("=",1)[0],param.split("=",1)[1]
 			item.setProperty(param.split("=",1)[0], param.split("=",1)[1].replace(" ", ""))
 	xbmc.Player(xbmc.PLAYER_CORE_AUTO).play(item.getProperty("tcUrl")+"/"+item.getProperty("playpath") + output)
-	xbmc.Player().setSubtitles('/tmp/areenasub.fin.srt')	
+	#xbmc.Player().setSubtitles('/tmp/areenasub.fin.srt')	
+	xbmc.Player().setSubtitles(subfilename)
 
 
 
